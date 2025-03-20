@@ -74,19 +74,19 @@ sequenceDiagram
     participant LowLatencyLayout
     participant LowLatencyBuffer
 
-    Client->>Config: 创建配置(num_sms, tokens...)
-    Config-->>Client: 返回配置实例
+    Client->>Config: Create Config(num_sms, tokens...)
+    Config-->>Client: Return config instance
 
     Client->>Config: get_nvl_buffer_size_hint(hidden_bytes, num_ranks)
-    Config-->>Client: 返回NVL缓冲区大小
+    Config-->>Client: Return NVL buffer size
 
     Client->>Config: get_rdma_buffer_size_hint(hidden_bytes, num_ranks)
-    Config-->>Client: 返回RDMA缓冲区大小
+    Config-->>Client: Return RDMA buffer size
 
-    Client->>LowLatencyLayout: 创建布局(rdma_buffer, tokens, hidden, ranks, experts)
-    LowLatencyLayout->>LowLatencyBuffer: 初始化两个缓冲区(odd/even)
-    LowLatencyLayout-->>Client: 返回布局实例
+    Client->>LowLatencyLayout: Create Layout(rdma_buffer, tokens, hidden, ranks, experts)
+    LowLatencyLayout->>LowLatencyBuffer: Initialize two buffers(odd/even)
+    LowLatencyLayout-->>Client: Return layout instance
 
     Client->>LowLatencyBuffer: clean_meta()
-    LowLatencyBuffer-->>Client: 返回清理元数据
+    LowLatencyBuffer-->>Client: Return cleaned metadata
 ```
