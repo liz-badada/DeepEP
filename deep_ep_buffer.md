@@ -135,6 +135,6 @@ sequenceDiagram
     $$
 
 - Notes
-    1. All calculation results are aligned to 128 bytes
-    2. RDMA buffer size includes bidirectional communication ($\times 2$)
-    3. Both buffers contain space for control information, data, metadata, TopK, and scale factors
+    - All calculation results are aligned to 128 bytes
+    - RDMA buffer size includes bidirectional communication ($\times 2$)
+    - Both buffers contain space for control information, data, metadata, TopK, and scale factors
