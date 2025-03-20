@@ -45,27 +45,46 @@
 ## start from python api
 ```mermaid
 sequenceDiagram
-    participant Python
-    participant FlashAPTPython as flash_mla_inference.py
-    participant FlashAPI as flash_api.cpp
-    participant FlashFwdMLAMetaData as flash_fwd_mla_metadata.cu
-    participant FlashFwdMLABF16SM90 as flash_fwd_mla_bf16_sm90.cu
+    participant Main
+    participant TestLoop
+    participant TestMain
+    participant Buffer
+    participant Dispatch
+    participant Combine
+    participant Benchmark
 
-    Python ->> FlashAPTPython: get_mla_metadata()
-    FlashAPTPython ->> FlashAPI: get_mla_metadata()
-    FlashAPI ->> FlashFwdMLAMetaData: get_mla_metadata_func()
-    FlashFwdMLAMetaData ->> FlashFwdMLAMetaData: get_mla_metadata_kernel()
-    FlashFwdMLAMetaData -->> FlashFwdMLAMetaData: return Mla_metadata_params
-    FlashFwdMLAMetaData -->> FlashAPI: {tile_scheduler_metadata, num_splits}
-    FlashAPI -->> Python: {tile_scheduler_metadata, num_splits}
-
-    Python ->> FlashAPTPython: flash_mla_with_kvcache()
-    FlashAPTPython ->> FlashAPI: mha_fwd_kvcache_mla()
-    FlashAPI ->> FlashAPI: tensor checks and reshaping
-    FlashAPI ->> FlashFwdMLABF16SM90: run_mha_fwd_splitkv_mla()
-    FlashFwdMLABF16SM90 ->> FlashFwdMLABF16SM90: run_flash_splitkv_fwd_mla()
-    FlashFwdMLABF16SM90 ->> FlashFwdMLABF16SM90: flash_fwd_splitkv_mla_kernel()
-    FlashFwdMLABF16SM90 ->> FlashFwdMLABF16SM90: flash_fwd_splitkv_mla_combine_kernel()
-    FlashFwdMLABF16SM90 -->> FlashAPI: {attention outputs, softmax logsumexp}
-    FlashAPI -->> Python: {attention outputs, softmax logsumexp}
+    Main->>TestLoop: spawn multiple processes
+    Note over TestLoop: Initialize distributed setup
+    
+    TestLoop->>Buffer: Create buffer with RDMA size
+    TestLoop->>TestMain: Run test with parameters
+    
+    rect rgb(200, 200, 255)
+        Note over TestMain: Test Dispatch & Combine
+        TestMain->>Buffer: low_latency_dispatch
+        Buffer-->>Dispatch: Process data
+        Note over Dispatch: Handle topk operations
+        Dispatch-->>TestMain: Return packed data
+        
+        TestMain->>Buffer: low_latency_combine
+        Buffer-->>Combine: Process data
+        Note over Combine: Combine results
+        Combine-->>TestMain: Return combined data
+    end
+    
+    rect rgb(200, 255, 200)
+        Note over TestMain: Benchmark Operations
+        TestMain->>Benchmark: Measure dispatch bandwidth
+        TestMain->>Benchmark: Measure combine bandwidth
+        Benchmark-->>TestMain: Return timing results
+    end
+    
+    TestMain-->>TestLoop: Return hash value
+    
+    loop Optional Pressure Test
+        TestLoop->>TestMain: Repeat test with different seeds
+        TestMain-->>TestLoop: Verify hash consistency
+    end
+    
+    TestLoop-->>Main: Complete test
 ```
