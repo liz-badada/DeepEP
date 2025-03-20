@@ -68,36 +68,25 @@ sequenceDiagram
 
 ## csrc/config.hpp
 ```mermaid
-classDiagram
-    class Config {
-        +int num_sms
-        +int num_max_nvl_chunked_send_tokens
-        +int num_max_nvl_chunked_recv_tokens
-        +int num_max_rdma_chunked_send_tokens
-        +int num_max_rdma_chunked_recv_tokens
-        +Config(int, int, int, int, int)
-        +get_nvl_buffer_size_hint(size_t, int)
-        +get_rdma_buffer_size_hint(int64_t, int)
-    }
+sequenceDiagram
+    participant Client
+    participant Config
+    participant LowLatencyLayout
+    participant LowLatencyBuffer
 
-    class LowLatencyBuffer {
-        +int num_clean_int
-        +void* dispatch_rdma_send_buffer
-        +void* dispatch_rdma_recv_data_buffer
-        +int* dispatch_rdma_recv_count_buffer
-        +int* dispatch_rdma_atomic_token_counter
-        +void* combine_rdma_send_buffer
-        +void* combine_rdma_recv_data_buffer
-        +int* combine_rdma_recv_flag_buffer
-        +clean_meta()
-    }
+    Client->>Config: 创建配置(num_sms, tokens...)
+    Config-->>Client: 返回配置实例
 
-    class LowLatencyLayout {
-        +size_t total_bytes
-        +LowLatencyBuffer buffers[2]
-        +advance()
-        +LowLatencyLayout(void*, int, int, int, int)
-    }
+    Client->>Config: get_nvl_buffer_size_hint(hidden_bytes, num_ranks)
+    Config-->>Client: 返回NVL缓冲区大小
 
-    LowLatencyLayout *-- LowLatencyBuffer : contains
+    Client->>Config: get_rdma_buffer_size_hint(hidden_bytes, num_ranks)
+    Config-->>Client: 返回RDMA缓冲区大小
+
+    Client->>LowLatencyLayout: 创建布局(rdma_buffer, tokens, hidden, ranks, experts)
+    LowLatencyLayout->>LowLatencyBuffer: 初始化两个缓冲区(odd/even)
+    LowLatencyLayout-->>Client: 返回布局实例
+
+    Client->>LowLatencyBuffer: clean_meta()
+    LowLatencyBuffer-->>Client: 返回清理元数据
 ```
