@@ -1,4 +1,4 @@
-## Buffer
+## deep_ep/buffer.py
 ```mermaid
 sequenceDiagram
     participant User
@@ -64,4 +64,40 @@ sequenceDiagram
         deep_ep_cpp-->>Buffer: Return layout information
         Buffer-->>User: Return layout tensors and event
     end
+```
+
+## csrc/config.hpp
+```mermaid
+classDiagram
+    class Config {
+        +int num_sms
+        +int num_max_nvl_chunked_send_tokens
+        +int num_max_nvl_chunked_recv_tokens
+        +int num_max_rdma_chunked_send_tokens
+        +int num_max_rdma_chunked_recv_tokens
+        +Config(int, int, int, int, int)
+        +get_nvl_buffer_size_hint(size_t, int)
+        +get_rdma_buffer_size_hint(int64_t, int)
+    }
+
+    class LowLatencyBuffer {
+        +int num_clean_int
+        +void* dispatch_rdma_send_buffer
+        +void* dispatch_rdma_recv_data_buffer
+        +int* dispatch_rdma_recv_count_buffer
+        +int* dispatch_rdma_atomic_token_counter
+        +void* combine_rdma_send_buffer
+        +void* combine_rdma_recv_data_buffer
+        +int* combine_rdma_recv_flag_buffer
+        +clean_meta()
+    }
+
+    class LowLatencyLayout {
+        +size_t total_bytes
+        +LowLatencyBuffer buffers[2]
+        +advance()
+        +LowLatencyLayout(void*, int, int, int, int)
+    }
+
+    LowLatencyLayout *-- LowLatencyBuffer : contains
 ```

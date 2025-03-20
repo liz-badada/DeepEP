@@ -42,7 +42,7 @@
     `-- nvshmem.patch
 ```
 
-## test_internode.py
+## tests/test_internode.py
 ```mermaid
 sequenceDiagram
     participant Main
@@ -102,7 +102,7 @@ sequenceDiagram
     end
 ```
 
-## test_intranode.py
+## tests/test_intranode.py
 ```mermaid
 sequenceDiagram
     participant Main
@@ -151,7 +151,7 @@ sequenceDiagram
     end
 ```
 
-## test_low_latency.py
+## tests/test_low_latency.py
 ```mermaid
 sequenceDiagram
     participant Main
