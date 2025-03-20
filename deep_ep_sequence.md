@@ -42,6 +42,55 @@
     `-- nvshmem.patch
 ```
 
+## test_intranode.py
+```mermaid
+sequenceDiagram
+    participant Main
+    participant TestLoop
+    participant TestMain
+    participant Buffer
+    participant Dispatch
+    participant Combine
+
+    Main->>TestLoop: spawn multiple processes
+    TestLoop->>TestLoop: init_dist()
+    TestLoop->>Buffer: create Buffer
+    TestLoop->>TestMain: test_main()
+    
+    Note over TestMain: Initialize test data:<br/>- Generate random tensors<br/>- Calculate expert meta<br/>- Calculate rank layout
+
+    TestMain->>Buffer: get_dispatch_layout()
+    
+    loop Test Different Configurations
+        Note over TestMain: Test combinations of:<br/>- previous_mode<br/>- async_mode<br/>- data types (FP8/BF16)<br/>- with/without top-k
+        
+        TestMain->>Dispatch: buffer.dispatch()
+        Note over Dispatch: Process dispatch operation
+        Dispatch-->>TestMain: return recv_x, indices, weights
+        
+        alt without top-k
+            TestMain->>Dispatch: cached dispatch
+        end
+        
+        TestMain->>Combine: buffer.combine()
+        Note over Combine: Process combine operation
+        Combine-->>TestMain: return combined results
+        
+        TestMain->>TestMain: verify results
+    end
+    
+    Note over TestMain: Performance Tuning
+    loop Tune Dispatch
+        TestMain->>Dispatch: test different configurations
+        Note over TestMain: Find best SM and chunk size
+    end
+    
+    loop Tune Combine
+        TestMain->>Combine: test different configurations
+        Note over TestMain: Find best SM and chunk size
+    end
+```
+
 ## test_low_latency.py
 ```mermaid
 sequenceDiagram
@@ -87,4 +136,64 @@ sequenceDiagram
     end
     
     TestLoop-->>Main: Complete test
+```
+
+## test_internode.py
+```mermaid
+sequenceDiagram
+    participant Main
+    participant TestLoop
+    participant TestMain
+    participant Buffer
+    participant DistributedGroup
+
+    Main->>TestLoop: spawn multiple processes
+    Note over TestLoop: Initialize with local_rank & num_local_ranks
+
+    TestLoop->>DistributedGroup: init_dist()
+    TestLoop->>Buffer: create Buffer instance
+
+    TestLoop->>TestMain: test_main()
+    
+    Note over TestMain: Initialize test parameters
+    TestMain->>TestMain: Generate random test data
+    
+    rect rgb(200, 200, 255)
+        Note over TestMain: Test Dispatch Phase
+        TestMain->>Buffer: get_dispatch_layout
+        Buffer-->>TestMain: return layout info
+        
+        loop For different modes
+            Note over TestMain: Test with different configurations
+            TestMain->>Buffer: dispatch()
+            Buffer-->>TestMain: receive dispatched data
+            
+            alt if not with_topk
+                TestMain->>Buffer: cached dispatch
+                Buffer-->>TestMain: receive cached data
+            end
+            
+            TestMain->>Buffer: combine()
+            Buffer-->>TestMain: return combined data
+            TestMain->>TestMain: verify results
+        end
+    end
+    
+    rect rgb(200, 255, 200)
+        Note over TestMain: Performance Tuning Phase
+        loop For different configurations
+            TestMain->>Buffer: tune dispatch performance
+            Buffer-->>TestMain: performance metrics
+        end
+        
+        loop For different configurations
+            TestMain->>Buffer: tune combine performance
+            Buffer-->>TestMain: performance metrics
+        end
+    end
+
+    opt If test_ll_compatibility
+        TestMain->>Buffer: clean_low_latency_buffer
+        TestMain->>TestMain: test_low_latency
+    end
 ```
