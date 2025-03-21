@@ -177,6 +177,10 @@ sequenceDiagram
         & Bytes_{send\_dispatch\_buffer} = N_{t} \cdot Bytes_{dispatch\_msg} \\
         & Bytes_{send\_combine\_buffer} = N_{e} \cdot N_{t} \cdot Bytes_{combine\_msg} \\
         & Bytes_{send\_buffer} = \max(Bytes_{send\_dispatch\_buffer},\ Bytes_{send\_combine\_buffer}) \\
+        \end{aligned}
+        ```
+        ```math
+        \begin{aligned}
         & Bytes_{recv\_dispatch\_buffer} = N_{e} \cdot N_{t} \cdot Bytes_{dispatch\_msg} \\
         & Bytes_{recv\_combine\_buffer} = N_{e} \cdot N_{t} \cdot Bytes_{combine\_msg} \\
         & Bytes_{recv\_buffer} = \max(Bytes_{recv\_dispatch\_buffer},\ Bytes_{recv\_combine\_buffer}) \\
