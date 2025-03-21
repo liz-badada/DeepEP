@@ -1,4 +1,7 @@
-## buffer.py -> deep_ep.cpp -> internode_ll.cu
+## Low Latency Dispatch
+
+buffer.py -> deep_ep.cpp -> internode_ll.cu
+
 ```mermaid
 sequenceDiagram
     participant Python as Python (buffer.py)
