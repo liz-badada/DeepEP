@@ -160,9 +160,7 @@ sequenceDiagram
 
 ### Low Latency Buffer Size (align to 128 bytes)
 - [get_low_latency_rdma_size_hint](https://github.com/liz-badada/DeepEP/blob/deepep_study/csrc/config.hpp#L123-L180)
-    - 2 symmetric odd/even send_buffers
-    - 2 symmetric odd/even recv_buffers
-    - 2 symmetric odd/even signaling buffers
+    - 2 symmetric odd/even send_buffers + 2 symmetric odd/even recv_buffers + 2 symmetric odd/even signaling buffers
     ```math
     \begin{aligned}
     & \text{Low\_Latency\_Buffer\_Size} = \left\lceil \frac{Send_{total} + Recv_{total} + Signal_{total}}{128} \right\rceil \cdot 128 \\
