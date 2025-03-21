@@ -1,42 +1,43 @@
 ## csrc/deep_ep.cpp
 ```mermaid
-graph TB
-    subgraph Buffer Class Functions
-        subgraph Initialization
-            rect1["Buffer Constructor"]
-            rect2["sync()"]
-            rect3["is_available()"]
-        end
+sequenceDiagram
+    participant Rank1 as Rank 1
+    participant NVL as NVLink Communication
+    participant RDMA as RDMA Communication 
+    participant Rank2 as Rank 2
 
-        subgraph Layout Management
-            rect4["get_dispatch_layout()"]
-            rect5["get_local_buffer_tensor()"]
-        end
+    rect rgb(200, 230, 255)
+        Note over Rank1,Rank2: Initialization Phase
+        Rank1->>NVL: Initialize IPC handles
+        Rank2->>NVL: Initialize IPC handles
+        Rank1->>RDMA: Initialize NVSHMEM
+        Rank2->>RDMA: Initialize NVSHMEM
+    end
 
-        subgraph Intranode Communication
-            rect6["intranode_dispatch()"]
-            rect7["intranode_combine()"]
-        end
+    rect rgb(255, 220, 220)
+        Note over Rank1,Rank2: Dispatch Phase
+        Rank1->>NVL: Send size info & layout
+        Rank1->>RDMA: Send tokens to remote ranks
+        Rank2->>NVL: Send size info & layout  
+        Rank2->>RDMA: Send tokens to remote ranks
+    end
 
-        subgraph Internode Communication
-            rect8["internode_dispatch()"]
-            rect9["internode_combine()"]
+    rect rgb(220, 255, 220)
+        Note over Rank1,Rank2: Communication Phase
+        par Intranode Communication
+            Rank1->>NVL: Exchange data via NVLink
+            Rank2->>NVL: Exchange data via NVLink
+        and Internode Communication
+            Rank1->>RDMA: Exchange data via NVSHMEM
+            Rank2->>RDMA: Exchange data via NVSHMEM
         end
+    end
 
-        subgraph Low Latency Mode
-            rect10["low_latency_dispatch()"]
-            rect11["low_latency_combine()"]
-            rect12["clean_low_latency_buffer()"]
-            rect13["get_next_low_latency_combine_buffer()"]
-        end
-
-        subgraph Utility Functions
-            rect14["get_num_rdma_ranks()"]
-            rect15["get_rdma_rank()"]
-            rect16["get_root_rdma_rank()"]
-            rect17["get_local_device_id()"]
-            rect18["get_local_ipc_handle()"]
-            rect19["get_local_nvshmem_unique_id()"]
-        end
+    rect rgb(255, 240, 200)
+        Note over Rank1,Rank2: Combine Phase
+        Rank1->>NVL: Combine local results
+        Rank1->>RDMA: Combine remote results
+        Rank2->>NVL: Combine local results
+        Rank2->>RDMA: Combine remote results
     end
 ```
