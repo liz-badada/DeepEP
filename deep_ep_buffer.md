@@ -163,7 +163,7 @@ where:
 
 ```math
 \begin{aligned}
-& \text{LowLatency\_Buffer\_Size} = \left\lceil \frac{\text{Send\_total} + \text{Recv\_total} + \text{Signal\_total}}{128} \right\rceil \cdot 128 \\
+& \text{Low\_Latency\_Buffer\_Size} = \left\lceil \frac{\text{Send\_total} + \text{Recv\_total} + \text{Signal\_total}}{128} \right\rceil \cdot 128 \\
 & \text{Send\_total} = 2 \cdot \max(\text{Send\_dispatch}, \text{Send\_combine}) \\
 & \text{Recv\_total} = 2 \cdot \max(\text{Recv\_dispatch}, \text{Recv\_combine}) \\
 & \text{Signal\_total} = 2 \cdot \max(\text{Signal\_count} + \text{Signal\_token}, \text{Signal\_count}) \\
