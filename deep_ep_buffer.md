@@ -195,7 +195,7 @@ sequenceDiagram
 
     - set: 
         ```math
-        \text{hidden\_size}=7168, N_{s}=\frac{\text{hidden\_size}}{128}=56, N_{t}=128, N_{e}=256, N_{r}=8
+        \text{hidden\_size}=7168,\ N_{s}=\frac{\text{hidden\_size}}{128}=56,\ N_{t}=128,\ N_{e}=256,\ N_{r}=8
         ```
     - then:
         ```math
