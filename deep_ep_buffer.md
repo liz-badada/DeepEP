@@ -160,8 +160,6 @@ sequenceDiagram
 
 ### Low Latency Buffer Size (align to 128 bytes)
 - [get_low_latency_rdma_size_hint](https://github.com/liz-badada/DeepEP/blob/deepep_study/csrc/config.hpp#L123-L180)
-    - 2 symmetric odd/even send_buffers + 2 symmetric odd/even recv_buffers + 2 symmetric odd/even signaling buffers
-    - dispatch could be BF16 or FP8, combine should be BF16
     ```math
     \begin{aligned}
     & \text{Low\_Latency\_Buffer\_Size} = \left\lceil \frac{2 \cdot Bytes_{send\_buffer} + 2 \cdot Bytes_{recv\_buffer} + 2 \cdot Bytes_{signal\_buffer}}{128} \right\rceil \cdot 128 \\
@@ -224,5 +222,8 @@ sequenceDiagram
 
 ### Notes for Low Latency Dispatch / Combine Buffer
 - Double buffering design (×2)
+    - 2 symmetric odd/even send_buffers + 2 symmetric odd/even recv_buffers + 2 symmetric odd/even signaling buffers
 - Buffer sizes for both dispatch and combine operations
+    - Dispatch could be BF16 or FP8, buffer size would be max(BF16, FP8), combine should be BF16
 - Memory alignment requirements
+    - Align to 128
