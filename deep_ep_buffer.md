@@ -92,7 +92,7 @@ sequenceDiagram
 ```
 
 - NVL Buffer Size (when num_ranks > 0, align to 128 bytes)
-    ```math
+    <!-- ```math
     \begin{aligned}
     \text{NVL\_Buffer\_Size} = \frac{((C \times R_{nvl} \times S_{total}) + 127 ) \times 128}{128}
     \end{aligned}
@@ -110,11 +110,11 @@ sequenceDiagram
     & S_{topk} = 128 \times (\text{sizeof(int64\_t)} + \text{sizeof(float)}) \\
     & S_{scale} = 128 \times \text{sizeof(float)}
     \end{aligned}
-    ```
+    ``` -->
     ![nvl_buffer_size](./figures/nvl_buffer_size.png)
 
 - RDMA Buffer Size (When num_ranks ≤ NUM_MAX_NVL_PEERS, align to 128 bytes)
-    ```math
+    <!-- ```math
     \begin{aligned}
     & \text{RDMA\_Buffer\_Size} = \frac{((C \times R_{rdma} \times 2S_{total}) + 127 ) \times 128}{128}
     \end{aligned}
@@ -133,7 +133,7 @@ sequenceDiagram
     & S_{scale} = 128 \times \text{sizeof(float)} \\
     & S_{int4} = \text{sizeof(int4)}
     \end{aligned}
-    ```
+    ``` -->
     ![rdma_buffer_size](./figures/rdma_buffer_size.png)
 
 - Notes
