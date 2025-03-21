@@ -179,8 +179,8 @@ sequenceDiagram
         & Recv_{dispatch} = N_{e} \cdot N_{t} \cdot Bytes_{dispatch\_msg} \\
         & Recv_{combine} = N_{e} \cdot N_{t} \cdot Bytes_{combine\_msg} \\
 
-        & Bytes_{dispatch\_msg} = sizeof(int4) + \max(\text{hidden\_size} \cdot sizeof(\text{nv\_bfloat16}), \text{hidden\_size} + N_{s} \cdot sizeof(float)) \\
-        & Bytes_{combine\_msg} = sizeof(int4) + \text{hidden\_size} \cdot sizeof(\text{bv\_bfloat16}) \\
+        & Bytes_{dispatch\_msg} = \text{sizeof(int4)} + \max(\text{hidden\_size} \cdot \text{sizeof(nv\_bfloat16)}, \text{hidden\_size} + N_{s} \cdot \text{sizeof(float)}) \\
+        & Bytes_{combine\_msg} = \text{sizeof(int4)} + \text{hidden\_size} \cdot \text{sizeof(nv\_bfloat16)} \\
 
         & Signal_{count} = N_{e} \cdot 4 \\
         & Signal_{token} = \frac{N_{e}}{N_{r}} \cdot 4 \\
@@ -201,8 +201,8 @@ sequenceDiagram
     - then:
         ```math
         \begin{aligned}
-        & Bytes_{dispatch\_msg} = sizeof(int4) + \max(\text{hidden\_size} \cdot sizeof(\text{nv\_bfloat16}), \text{hidden\_size} + N_{s} \cdot sizeof(float)) = 16 + \max(7168 \cdot 2, 7168 + 56 \cdot 4) = 14,352 \\
-        & Bytes_{combine\_msg} = sizeof(int4) + \text{hidden\_size} \cdot sizeof(\text{bv\_bfloat16}) = 16 + 7168 \cdot 2 = 14,352 \\
+        & Bytes_{dispatch\_msg} = = \text{sizeof(int4)} + \max(\text{hidden\_size} \cdot \text{sizeof(nv\_bfloat16)}, \text{hidden\_size} + N_{s} \cdot \text{sizeof(float)}) = 16 + \max(7168 \cdot 2, 7168 + 56 \cdot 4) = 14,352 \\
+        & Bytes_{combine\_msg} = \text{sizeof(int4)} + \text{hidden\_size} \cdot \text{sizeof(nv\_bfloat16)} = 16 + 7168 \cdot 2 = 14,352 \\
 
         & Send_{dispatch} = N_{t} \cdot Bytes_{dispatch\_msg} = 128 \cdot (14,352) = 946,688 \\
         & Send_{combine} = N_{e} \cdot N_{t} \cdot Bytes_{combine\_msg} = 256 \cdot 128 \cdot (14,352) = 469,893,120 \\
