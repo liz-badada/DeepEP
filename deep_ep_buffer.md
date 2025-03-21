@@ -136,7 +136,7 @@ where:
 \end{aligned}
 ```
 
-### Normal Dispatch / Combine Buffer Notes
+### Notes for Normal Dispatch / Combine Buffer
 - All calculation results are aligned to 128 bytes
 - RDMA buffer size includes bidirectional communication ($\times 2$)
 - Both buffers contain space for control information, data, metadata, TopK, and scale factors
@@ -169,7 +169,7 @@ where:
 & \text{Signal\_total} = 2 \cdot \max(\text{Signal\_count} + \text{Signal\_token}, \text{Signal\_count}) \\
 \end{aligned}
 ```
-where
+where:
 ```math
 \begin{aligned}
 & \text{Send\_dispatch} = N_{t} \cdot \text{Message\_dispatch} \\
@@ -191,7 +191,7 @@ where
 \end{aligned}
 ```
 
-### Low Latency Dispatch / Combine Buffer Notes
+### Notes for Low Latency Dispatch / Combine Buffer
 - Double buffering design (×2)
 - Buffer sizes for both dispatch and combine operations
 - Memory alignment requirements
