@@ -171,14 +171,14 @@ sequenceDiagram
     - where:
         ```math
         \begin{aligned}
-        & Send_{dispatch} = N_{t} \cdot \text{Message\_dispatch} \\
-        & Send_{combine} = N_{e} \cdot N_{t} \cdot \text{Message\_combine} \\
+        & Send_{dispatch} = N_{t} \cdot Message_{dispatch} \\
+        & Send_{combine} = N_{e} \cdot N_{t} \cdot Message_{combine} \\
 
-        & Recv_{dispatch} = N_{e} \cdot N_{t} \cdot \text{Message\_dispatch} \\
-        & Recv_{combine} = N_{e} \cdot N_{t} \cdot \text{Message\_combine} \\
+        & Recv_{dispatch} = N_{e} \cdot N_{t} \cdot Message_{dispatch} \\
+        & Recv_{combine} = N_{e} \cdot N_{t} \cdot Message_{combine} \\
 
-        & \text{Message\_dispatch} = \text{hidden\_size} + N_{s} \cdot 4 + 4 \\
-        & \text{Message\_combine} = 4 + \text{hidden\_size} \cdot 2 \\
+        & Message_{dispatch} = \text{hidden\_size} + N_{s} \cdot 4 + 4 \\
+        & Message_{combine} = 4 + \text{hidden\_size} \cdot 2 \\
 
         & Signal_{count} = N_{e} \cdot 4 \\
         & Signal_{token} = \frac{N_{e}}{N_{r}} \cdot 4 \\
@@ -201,13 +201,13 @@ sequenceDiagram
         \begin{aligned}
         % & \text{hidden\_size}=7168, N_{s}=\frac{\text{hidden\_size}}{128}=56, N_{t}=128, N_{e}=256, N_{r}=8 \\
 
-        & \text{Message\_dispatch} = \text{hidden\_size} + N_{s} \cdot 4 + 4 = 7168 + 56 \cdot 4 + 4 = 7,396 \\
-        & \text{Message\_combine} = 4 + \text{hidden\_size} \cdot 2 = 4 + 7168 \cdot 2 = 14,340 \\
+        & Message_{dispatch} = \text{hidden\_size} + N_{s} \cdot 4 + 4 = 7168 + 56 \cdot 4 + 4 = 7,396 \\
+        & Message_{combine} = 4 + \text{hidden\_size} \cdot 2 = 4 + 7168 \cdot 2 = 14,340 \\
 
-        & Send_{dispatch} = N_{t} \cdot \text{Message\_dispatch} = 128 \cdot (7,396) = 946,688 \\
-        & Send_{combine} = N_{e} \cdot N_{t} \cdot \text{Message\_combine} = 256 \cdot 128 \cdot (14,340) = 469,893,120 \\
-        & Recv_{dispatch} = N_{e} \cdot N_{t} \cdot \text{Message\_dispatch} = 256 \cdot 128 \cdot (7,396) = 242,352,128 \\
-        & Recv_{combine} = N_{e} \cdot N_{t} \cdot \text{Message\_combine} = 256 \cdot 128 \cdot (14,340) = 469,893,120 \\
+        & Send_{dispatch} = N_{t} \cdot Message_{dispatch} = 128 \cdot (7,396) = 946,688 \\
+        & Send_{combine} = N_{e} \cdot N_{t} \cdot Message_{combine} = 256 \cdot 128 \cdot (14,340) = 469,893,120 \\
+        & Recv_{dispatch} = N_{e} \cdot N_{t} \cdot Message_{dispatch} = 256 \cdot 128 \cdot (7,396) = 242,352,128 \\
+        & Recv_{combine} = N_{e} \cdot N_{t} \cdot Message_{combine} = 256 \cdot 128 \cdot (14,340) = 469,893,120 \\
         & Send_{total} = 2 \cdot \max(Send_{dispatch}, Send_{combine}) = 2 \cdot (469,893,120) = 939,786,240 \\
         & Recv_{total} = 2 \cdot \max(Recv_{dispatch}, Recv_{combine}) = 2 \cdot (469,893,120) = 939,786,240 \\
 
