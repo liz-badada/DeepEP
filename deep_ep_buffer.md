@@ -165,9 +165,6 @@ sequenceDiagram
     ```math
     \begin{aligned}
     & \text{Low\_Latency\_Buffer\_Size} = \left\lceil \frac{2 \cdot Bytes_{send\_buffer} + 2 \cdot Bytes_{recv\_buffer} + 2 \cdot Bytes_{signal\_buffer}}{128} \right\rceil \cdot 128 \\
-    & Bytes_{send\_buffer} = \max(Bytes_{send\_dispatch\_buffer}, Bytes_{send\_combine\_buffer}) \\
-    & Bytes_{recv\_buffer} = \max(Bytes_{recv\_dispatch\_buffer}, Bytes_{recv\_combine\_buffer}) \\
-    & Bytes_{signal\_buffer} = \max(Bytes_{signal\_dispatch\_recv\_count} + Bytes_{signal\_combine\_recv\_flag}, Bytes_{signal\_dispatch\_recv\_count}) \\
     \end{aligned}
     ```
     - where:
@@ -178,12 +175,14 @@ sequenceDiagram
 
         & Bytes_{send\_dispatch\_buffer} = N_{t} \cdot Bytes_{dispatch\_msg} \\
         & Bytes_{send\_combine\_buffer} = N_{e} \cdot N_{t} \cdot Bytes_{combine\_msg} \\
-
+        & Bytes_{send\_buffer} = \max(Bytes_{send\_dispatch\_buffer}, Bytes_{send\_combine\_buffer}) \\
         & Bytes_{recv\_dispatch\_buffer} = N_{e} \cdot N_{t} \cdot Bytes_{dispatch\_msg} \\
         & Bytes_{recv\_combine\_buffer} = N_{e} \cdot N_{t} \cdot Bytes_{combine\_msg} \\
+        & Bytes_{recv\_buffer} = \max(Bytes_{recv\_dispatch\_buffer}, Bytes_{recv\_combine\_buffer}) \\
 
         & Bytes_{signal\_dispatch\_recv\_count} = N_{e} \cdot \text{sizeof(int)} \\
         & Bytes_{signal\_combine\_recv\_flag} = Bytes_{signal\_dispatch\_recv\_count} \\
+        & Bytes_{signal\_buffer} = \max(Bytes_{signal\_dispatch\_recv\_count},\ Bytes_{signal\_combine\_recv\_flag}) \\
 
         & N_{s} = \text{num\_scales} = \frac{\text{hidden\_size}}{128} \\
         & N_{t} = \text{num\_max\_dispatch\_tokens\_per\_rank} \\
