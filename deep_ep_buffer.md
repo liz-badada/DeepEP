@@ -113,7 +113,7 @@ sequenceDiagram
     ``` -->
     ![nvl_buffer_size](./figures/nvl_buffer_size.png)
 
-- RDMA Buffer Size (When num_ranks ≤ NUM_MAX_NVL_PEERS, align to 128 bytes)
+- RDMA Buffer Size (when num_ranks ≤ NUM_MAX_NVL_PEERS, align to 128 bytes)
     <!-- ```math
     \begin{aligned}
     & \text{RDMA\_Buffer\_Size} = \frac{((C \times R_{rdma} \times 2S_{total}) + 127 ) \times 128}{128}
