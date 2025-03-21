@@ -1,4 +1,4 @@
-## Low Latency Dispatch (buffer.py -> deep_ep.cpp -> internode_ll.cu)
+## Low Latency Dispatch (-> buffer.py -> deep_ep.cpp -> internode_ll.cu)
 ```mermaid
 sequenceDiagram
     participant Python as Python (buffer.py)
@@ -42,7 +42,7 @@ sequenceDiagram
     Note over Python: Return tuple containing:<br/>1. packed_recv_x (& scales)<br/>2. packed_recv_count<br/>3. handle<br/>4. event<br/>5. hook
 ```
 
-## Low Latency Combine (buffer.py -> deep_ep.cpp -> internode_ll.cu)
+## Low Latency Combine (-> buffer.py -> deep_ep.cpp -> internode_ll.cu)
 ```mermaid
 sequenceDiagram
     participant Python as Python (buffer.py)
