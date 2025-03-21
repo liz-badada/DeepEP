@@ -91,7 +91,7 @@ sequenceDiagram
     LowLatencyBuffer-->>Client: Return cleaned metadata
 ```
 
-### NVL Buffer Size (when num_ranks > 0, align to 128 bytes)
+### NVL Buffer Size (when num_ranks > 0, align to 128 bytes, [get_nvl_buffer_size_hint](https://github.com/liz-badada/DeepEP/blob/deepep_study/csrc/config.hpp#L45-L65))
 <!-- ```math
 \begin{aligned}
 \text{NVL\_Buffer\_Size} = \frac{((C \times R_{nvl} \times S_{total}) + 127 ) \times 128}{128}
@@ -113,7 +113,7 @@ where:
 ``` -->
 ![nvl_buffer_size](./figures/nvl_buffer_size.png)
 
-### RDMA Buffer Size (when num_ranks ≤ NUM_MAX_NVL_PEERS, align to 128 bytes)
+### RDMA Buffer Size (when num_ranks ≤ NUM_MAX_NVL_PEERS, align to 128 bytes, [get_rdma_buffer_size_hint](https://github.com/liz-badada/DeepEP/blob/deepep_study/csrc/config.hpp#L67-L91))
 <!-- ```math
 \begin{aligned}
 & \text{RDMA\_Buffer\_Size} = \frac{((C \times R_{rdma} \times 2S_{total}) + 127 ) \times 128}{128}
