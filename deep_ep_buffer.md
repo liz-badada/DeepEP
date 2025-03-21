@@ -161,6 +161,7 @@ sequenceDiagram
 ### Low Latency Buffer Size (align to 128 bytes)
 - [get_low_latency_rdma_size_hint](https://github.com/liz-badada/DeepEP/blob/deepep_study/csrc/config.hpp#L123-L180)
     - 2 symmetric odd/even send_buffers + 2 symmetric odd/even recv_buffers + 2 symmetric odd/even signaling buffers
+    - dispatch could be BF16 or FP8, combine should be BF16
     ```math
     \begin{aligned}
     & \text{Low\_Latency\_Buffer\_Size} = \left\lceil \frac{Send_{total} + Recv_{total} + Signal_{total}}{128} \right\rceil \cdot 128 \\
@@ -172,14 +173,14 @@ sequenceDiagram
     - where:
         ```math
         \begin{aligned}
-        & Send_{dispatch} = N_{t} \cdot Message_{dispatch} \\
-        & Send_{combine} = N_{e} \cdot N_{t} \cdot Message_{combine} \\
+        & Send_{dispatch} = N_{t} \cdot Bytes_{dispatch\_msg} \\
+        & Send_{combine} = N_{e} \cdot N_{t} \cdot Bytes_{combine\_msg} \\
 
-        & Recv_{dispatch} = N_{e} \cdot N_{t} \cdot Message_{dispatch} \\
-        & Recv_{combine} = N_{e} \cdot N_{t} \cdot Message_{combine} \\
+        & Recv_{dispatch} = N_{e} \cdot N_{t} \cdot Bytes_{dispatch\_msg} \\
+        & Recv_{combine} = N_{e} \cdot N_{t} \cdot Bytes_{combine\_msg} \\
 
-        & Message_{dispatch} = \text{hidden\_size} + N_{s} \cdot 4 + 4 \\
-        & Message_{combine} = 4 + \text{hidden\_size} \cdot 2 \\
+        & Bytes_{dispatch\_msg} = sizeof(int4) + \max(\text{hidden\_size} \cdot sizeof(\text{nv\_bfloat16}), \text{hidden\_size} + N_{s} \cdot sizeof(float)) \\
+        & Bytes_{combine\_msg} = sizeof(int4) + \text{hidden\_size} \cdot sizeof(\text{bv\_bfloat16}) \\
 
         & Signal_{count} = N_{e} \cdot 4 \\
         & Signal_{token} = \frac{N_{e}}{N_{r}} \cdot 4 \\
@@ -200,15 +201,13 @@ sequenceDiagram
     - then:
         ```math
         \begin{aligned}
-        % & \text{hidden\_size}=7168, N_{s}=\frac{\text{hidden\_size}}{128}=56, N_{t}=128, N_{e}=256, N_{r}=8 \\
+        & Bytes_{dispatch\_msg} = sizeof(int4) + \max(\text{hidden\_size} \cdot sizeof(\text{nv\_bfloat16}), \text{hidden\_size} + N_{s} \cdot sizeof(float)) = 16 + \max(7168 \cdot 2, 7168 + 56 \cdot 4) = 14,352 \\
+        & Bytes_{combine\_msg} = sizeof(int4) + \text{hidden\_size} \cdot sizeof(\text{bv\_bfloat16}) = 16 + 7168 \cdot 2 = 14,352 \\
 
-        & Message_{dispatch} = \text{hidden\_size} + N_{s} \cdot 4 + 4 = 7168 + 56 \cdot 4 + 4 = 7,396 \\
-        & Message_{combine} = 4 + \text{hidden\_size} \cdot 2 = 4 + 7168 \cdot 2 = 14,340 \\
-
-        & Send_{dispatch} = N_{t} \cdot Message_{dispatch} = 128 \cdot (7,396) = 946,688 \\
-        & Send_{combine} = N_{e} \cdot N_{t} \cdot Message_{combine} = 256 \cdot 128 \cdot (14,340) = 469,893,120 \\
-        & Recv_{dispatch} = N_{e} \cdot N_{t} \cdot Message_{dispatch} = 256 \cdot 128 \cdot (7,396) = 242,352,128 \\
-        & Recv_{combine} = N_{e} \cdot N_{t} \cdot Message_{combine} = 256 \cdot 128 \cdot (14,340) = 469,893,120 \\
+        & Send_{dispatch} = N_{t} \cdot Bytes_{dispatch\_msg} = 128 \cdot (14,352) = 946,688 \\
+        & Send_{combine} = N_{e} \cdot N_{t} \cdot Bytes_{combine\_msg} = 256 \cdot 128 \cdot (14,352) = 469,893,120 \\
+        & Recv_{dispatch} = N_{e} \cdot N_{t} \cdot Bytes_{dispatch\_msg} = 256 \cdot 128 \cdot (14,352) = 242,352,128 \\
+        & Recv_{combine} = N_{e} \cdot N_{t} \cdot Bytes_{combine\_msg} = 256 \cdot 128 \cdot (14,352) = 469,893,120 \\
         & Send_{total} = 2 \cdot \max(Send_{dispatch}, Send_{combine}) = 2 \cdot (469,893,120) = 939,786,240 \\
         & Recv_{total} = 2 \cdot \max(Recv_{dispatch}, Recv_{combine}) = 2 \cdot (469,893,120) = 939,786,240 \\
 
