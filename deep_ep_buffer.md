@@ -162,7 +162,7 @@ sequenceDiagram
 - [get_low_latency_rdma_size_hint](https://github.com/liz-badada/DeepEP/blob/deepep_study/csrc/config.hpp#L123-L180)
     ```math
     \begin{aligned}
-    & \text{Low\_Latency\_Buffer\_Size} = \left\lceil \frac{2 \cdot Bytes_{send\_buffer} + 2 \cdot Bytes_{recv\_buffer} + 2 \cdot Bytes_{signal\_buffer}}{128} \right\rceil \cdot 128 \\
+    & \text{Low\_Latency\_Buffer\_Size} = \frac{(2 \cdot Bytes_{send\_buffer} + 2 \cdot Bytes_{recv\_buffer} + 2 \cdot Bytes_{signal\_buffer} + 128)}{128} \cdot 128 \\
     \end{aligned}
     ```
     - where:
