@@ -158,55 +158,32 @@ where:
 
     </center>
 
-### Low Latency Buffer Size
+### Low Latency Buffer Size (align to 128 bytes)
 [get_low_latency_rdma_size_hint](https://github.com/liz-badada/DeepEP/blob/deepep_study/csrc/config.hpp#L123-L180)
 
-Message Size
 ```math
 \begin{aligned}
-& \text{Message\_dispatch} = \text{hidden\_size} + N_{s} \cdot 4 + 4 \\
-& \text{Message\_combine} = 4 + \text{hidden\_size} \cdot 2 \\
+& \text{LowLatency\_Buffer\_Size} = \left\lceil \frac{\text{Send\_total} + \text{Recv\_total} + \text{Signal\_total}}{128} \right\rceil \cdot 128 \\
+& \text{Send\_total} = 2 \cdot \max(\text{Send\_dispatch}, \text{Send\_combine}) \\
+& \text{Recv\_total} = 2 \cdot \max(\text{Recv\_dispatch}, \text{Recv\_combine}) \\
+& \text{Signal\_total} = 2 \cdot \max(\text{Signal\_count} + \text{Signal\_token}, \text{Signal\_count}) \\
 \end{aligned}
 ```
-
-Send Buffer
+where
 ```math
 \begin{aligned}
 & \text{Send\_dispatch} = N_{t} \cdot \text{Message\_dispatch} \\
 & \text{Send\_combine} = N_{e} \cdot N_{t} \cdot \text{Message\_combine} \\
-& \text{Send\_total} = 2 \cdot \max(\text{Send\_dispatch}, \text{Send\_combine}) \\
-\end{aligned}
-```
 
-Recv Buffer
-```math
-\begin{aligned}
 & \text{Recv\_dispatch} = N_{e} \cdot N_{t} \cdot \text{Message\_dispatch} \\
 & \text{Recv\_combine} = N_{e} \cdot N_{t} \cdot \text{Message\_combine} \\
-& \text{Recv\_total} = 2 \cdot \max(\text{Recv\_dispatch}, \text{Recv\_combine}) \\
-\end{aligned}
-```
 
-Signal Buffer
-```math
-\begin{aligned}
+& \text{Message\_dispatch} = \text{hidden\_size} + N_{s} \cdot 4 + 4 \\
+& \text{Message\_combine} = 4 + \text{hidden\_size} \cdot 2 \\
+
 & \text{Signal\_count} = N_{e} \cdot 4 \\
 & \text{Signal\_token} = \frac{N_{e}}{N_{r}} \cdot 4 \\
-& \text{Signal\_total} = 2 \cdot \max(\text{Signal\_count} + \text{Signal\_token}, \text{Signal\_count}) \\
-\end{aligned}
-```
 
-Total & Align to 128 Bytes
-```math
-\begin{aligned}
-& \text{Bytes\_total} = \text{Send\_total} + \text{Recv\_total} + \text{Signal\_total} \\
-& \text{Bytes\_aligned} = \left\lceil \frac{\text{Bytes\_total}}{128} \right\rceil \cdot 128 \\
-\end{aligned}
-```
-
-where
-```math
-\begin{aligned}
 & N_{s} = \text{num\_scales} = \frac{\text{hidden\_size}}{128} \\
 & N_{t} = \text{num\_max\_dispatch\_tokens\_per\_rank} \\
 & N_{e} = \text{num\_experts} \\
