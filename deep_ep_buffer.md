@@ -143,19 +143,19 @@ where:
 - RDMA buffer size includes bidirectional communication ($\times 2$)
 - Both buffers contain space for control information, data, metadata, TopK, and scale factors
 - Constants
-<center>
+    <center>
 
-| Constant | Value | Description |
-|---|---|---|
-| NUM_MAX_NVL_PEERS | 8 | Maximum number of NVL peers |
-| NUM_MAX_RDMA_PEERS | 20 | Maximum number of RDMA peers |
-| NUM_MAX_FIFO_SLOTS | 32768 | Maximum number of FIFO slots |
-| NUM_WORKSPACE_BYTES | 32 * 1024 * 1024 | Workspace size in bytes (32MB) |
-| NUM_MAX_LOCAL_EXPERTS | 1024 | Maximum number of local experts |
-| NUM_BUFFER_ALIGNMENT_BYTES | 128 | Buffer alignment size in bytes |
-| FINISHED_SUM_TAG | 1024 | Finished sum tag |
-| NUM_CPU_TIMEOUT_SECS | 100 | CPU timeout in seconds |
-| NUM_TIMEOUT_CYCLES | 200000000000ull | Timeout cycles (~100s) |
-| NUM_WAIT_NANOSECONDS | 500 | Wait time in nanoseconds |
+    | Constant | Value | Description |
+    |---|---|---|
+    | NUM_MAX_NVL_PEERS | 8 | Maximum number of NVL peers |
+    | NUM_MAX_RDMA_PEERS | 20 | Maximum number of RDMA peers |
+    | NUM_MAX_FIFO_SLOTS | 32768 | Maximum number of FIFO slots |
+    | NUM_WORKSPACE_BYTES | 32 * 1024 * 1024 | Workspace size in bytes (32MB) |
+    | NUM_MAX_LOCAL_EXPERTS | 1024 | Maximum number of local experts |
+    | NUM_BUFFER_ALIGNMENT_BYTES | 128 | Buffer alignment size in bytes |
+    | FINISHED_SUM_TAG | 1024 | Finished sum tag |
+    | NUM_CPU_TIMEOUT_SECS | 100 | CPU timeout in seconds |
+    | NUM_TIMEOUT_CYCLES | 200000000000ull | Timeout cycles (~100s) |
+    | NUM_WAIT_NANOSECONDS | 500 | Wait time in nanoseconds |
 
-</center>
+    </center>
