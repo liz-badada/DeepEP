@@ -164,26 +164,26 @@ sequenceDiagram
     - dispatch could be BF16 or FP8, combine should be BF16
     ```math
     \begin{aligned}
-    & \text{Low\_Latency\_Buffer\_Size} = \left\lceil \frac{Send_{total} + Recv_{total} + Signal_{total}}{128} \right\rceil \cdot 128 \\
-    & Send_{total} = 2 \cdot \max(Send_{dispatch}, Send_{combine}) \\
-    & Recv_{total} = 2 \cdot \max(Recv_{dispatch}, Recv_{combine}) \\
-    & Signal_{total} = 2 \cdot \max(Signal_{count} + Signal_{token}, Signal_{count}) \\
+    & \text{Low\_Latency\_Buffer\_Size} = \left\lceil \frac{2 \cdot Bytes_{send\_buffer} + 2 \cdot Bytes_{recv\_buffer} + 2 \cdot Bytes_{signal\_buffer}}{128} \right\rceil \cdot 128 \\
+    & Bytes_{send\_buffer} = \max(Bytes_{send\_dispatch\_buffer}, Bytes_{send\_combine\_buffer}) \\
+    & Bytes_{recv\_buffer} = \max(Bytes_{recv\_dispatch\_buffer}, Bytes_{recv\_combine\_buffer}) \\
+    & Bytes_{signal\_buffer} = \max(Bytes_{signal\_dispatch\_recv\_count} + Bytes_{signal\_combine\_recv\_flag}, Bytes_{signal\_dispatch\_recv\_count}) \\
     \end{aligned}
     ```
     - where:
         ```math
         \begin{aligned}
-        & Send_{dispatch} = N_{t} \cdot Bytes_{dispatch\_msg} \\
-        & Send_{combine} = N_{e} \cdot N_{t} \cdot Bytes_{combine\_msg} \\
-
-        & Recv_{dispatch} = N_{e} \cdot N_{t} \cdot Bytes_{dispatch\_msg} \\
-        & Recv_{combine} = N_{e} \cdot N_{t} \cdot Bytes_{combine\_msg} \\
-
         & Bytes_{dispatch\_msg} = \text{sizeof(int4)} + \max(\text{hidden\_size} \cdot \text{sizeof(nv\_bfloat16)},\ \text{hidden\_size} + N_{s} \cdot \text{sizeof(float)}) \\
         & Bytes_{combine\_msg} = \text{sizeof(int4)} + \text{hidden\_size} \cdot \text{sizeof(nv\_bfloat16)} \\
 
-        & Signal_{count} = N_{e} \cdot 4 \\
-        & Signal_{token} = \frac{N_{e}}{N_{r}} \cdot 4 \\
+        & Bytes_{send\_dispatch\_buffer} = N_{t} \cdot Bytes_{dispatch\_msg} \\
+        & Bytes_{send\_combine\_buffer} = N_{e} \cdot N_{t} \cdot Bytes_{combine\_msg} \\
+
+        & Bytes_{recv\_dispatch\_buffer} = N_{e} \cdot N_{t} \cdot Bytes_{dispatch\_msg} \\
+        & Bytes_{recv\_combine\_buffer} = N_{e} \cdot N_{t} \cdot Bytes_{combine\_msg} \\
+
+        & Bytes_{signal\_dispatch\_recv\_count} = N_{e} \cdot \text{sizeof(int)} \\
+        & Bytes_{signal\_combine\_recv\_flag} = Bytes_{signal\_dispatch\_recv\_count} \\
 
         & N_{s} = \text{num\_scales} = \frac{\text{hidden\_size}}{128} \\
         & N_{t} = \text{num\_max\_dispatch\_tokens\_per\_rank} \\
@@ -204,18 +204,18 @@ sequenceDiagram
         & Bytes_{dispatch\_msg} = 16 + \max(7168 \cdot 2,\ 7168 + 56 \cdot 4) = 14,352 \\
         & Bytes_{combine\_msg} = 16 + 7168 \cdot 2 = 14,352 \\
 
-        & Send_{dispatch} = N_{t} \cdot Bytes_{dispatch\_msg} = 128 \cdot (14,352) = 946,688 \\
-        & Send_{combine} = N_{e} \cdot N_{t} \cdot Bytes_{combine\_msg} = 256 \cdot 128 \cdot (14,352) = 469,893,120 \\
-        & Recv_{dispatch} = N_{e} \cdot N_{t} \cdot Bytes_{dispatch\_msg} = 256 \cdot 128 \cdot (14,352) = 242,352,128 \\
-        & Recv_{combine} = N_{e} \cdot N_{t} \cdot Bytes_{combine\_msg} = 256 \cdot 128 \cdot (14,352) = 469,893,120 \\
-        & Send_{total} = 2 \cdot \max(Send_{dispatch}, Send_{combine}) = 2 \cdot (469,893,120) = 939,786,240 \\
-        & Recv_{total} = 2 \cdot \max(Recv_{dispatch}, Recv_{combine}) = 2 \cdot (469,893,120) = 939,786,240 \\
+        & Bytes_{send\_dispatch\_buffer} = 128 \cdot (14,352) = 1,837,056 \\
+        & Bytes_{send\_combine\_buffer} = 256 \cdot 128 \cdot (14,352) = 470,286,336 \\
+        & Bytes_{send\_buffer} = \max(1,837,056,\ 470,286,336) = 470,286,336 \\
+        & Bytes_{recv\_dispatch\_buffer} = 256 \cdot 128 \cdot (14,352) = 470,286,336 \\
+        & Bytes_{recv\_combine\_buffer} = 256 \cdot 128 \cdot (14,352) = 470,286,336 \\
+        & Bytes_{recv\_buffer} = \max(470,286,336,\ 470,286,336) = 470,286,336 \\
 
-        & Signal_{count} = N_{e} \cdot 4 = 256 \cdot 4 = 1,024 \\
-        & Signal_{token} = \frac{N_{e}}{N_{r}} \cdot 4 = 128 \\
-        & Signal_{total} = 2 \cdot \max(Signal_{count} + Signal_{token}, Signal_{count}) = 2 \cdot (1,152) = 2,304 \\
+        & Bytes_{signal\_dispatch\_recv\_count} = 256 \cdot 4 = 1,024 \\
+        & Bytes_{signal\_combine\_recv\_flag} = Bytes_{signal\_dispatch\_recv\_count} = 1,024 \\
+        & Bytes_{signal\_buffer} = \max(1,024, \ 1,024) = 1,024 \\
 
-        & \text{Low\_Latency\_Buffer\_Size} = \left\lceil \frac{Send_{total} + Recv_{total} + Signal_{total}}{128} \right\rceil \cdot 128 = \left\lceil \frac{939,786,240 + 939,786,240 + 2,304}{128} \right\rceil \cdot 128 = 1,879,574,784 \approx 1.8 GB \\
+        & \text{Low\_Latency\_Buffer\_Size} = \frac{2 \cdot (470,286,336) + 2 \cdot (470,286,336) + 2 \cdot (1,024) + 128}{128} \cdot 128 = 1,881,147,520 \approx 1.8 GB \\
         \end{aligned}
         ```
     - log:
