@@ -215,7 +215,7 @@ sequenceDiagram
         & Bytes_{signal\_combine\_recv\_flag} = Bytes_{signal\_dispatch\_recv\_count} = 1,024 \\
         & Bytes_{signal\_buffer} = \max(1,024, \ 1,024) = 1,024 \\
 
-        & \text{Low\_Latency\_Buffer\_Size} = \frac{2 \cdot (470,286,336) + 2 \cdot (470,286,336) + 2 \cdot (1,024) + 128}{128} \cdot 128 = 1,881,147,520 \approx 1.8 GB \\
+        & \text{Low\_Latency\_Buffer\_Size} = \frac{(2 \cdot (470,286,336) + 2 \cdot (470,286,336) + 2 \cdot (1,024) + 128)}{128} \cdot 128 = 1,881,147,520 \approx 1.8 GB \\
         \end{aligned}
         ```
     - log:
