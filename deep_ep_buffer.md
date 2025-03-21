@@ -190,6 +190,32 @@ where:
 & N_{r} = \text{num\_ranks} \\
 \end{aligned}
 ```
+example (set: $\text{hidden\_size}=7168, N_{s}=\frac{\text{hidden\_size}}{128}=56, N_{t}=128, N_{e}=256, N_{r}=8$):
+```math
+\begin{aligned}
+% & \text{hidden\_size}=7168, N_{s}=\frac{\text{hidden\_size}}{128}=56, N_{t}=128, N_{e}=256, N_{r}=8 \\
+
+& \text{Message\_dispatch} = \text{hidden\_size} + N_{s} \cdot 4 + 4 = 7168 + 56 \cdot 4 + 4 = 7,396 \\
+& \text{Message\_combine} = 4 + \text{hidden\_size} \cdot 2 = 4 + 7168 \cdot 2 = 14,340 \\
+
+& \text{Send\_dispatch} = N_{t} \cdot \text{Message\_dispatch} = 128 \cdot (7,396) = 946,688 \\
+& \text{Send\_combine} = N_{e} \cdot N_{t} \cdot \text{Message\_combine} = 256 \cdot 128 \cdot (14,340) = 469,893,120 \\
+& \text{Recv\_dispatch} = N_{e} \cdot N_{t} \cdot \text{Message\_dispatch} = 256 \cdot 128 \cdot (7,396) = 242,352,128 \\
+& \text{Recv\_combine} = N_{e} \cdot N_{t} \cdot \text{Message\_combine} = 256 \cdot 128 \cdot (14,340) = 469,893,120 \\
+& \text{Send\_total} = 2 \cdot \max(\text{Send\_dispatch}, \text{Send\_combine}) = 2 \cdot (469,893,120) = 939,786,240 \\
+& \text{Recv\_total} = 2 \cdot \max(\text{Recv\_dispatch}, \text{Recv\_combine}) = 2 \cdot (469,893,120) = 939,786,240 \\
+
+& \text{Signal\_count} = N_{e} \cdot 4 = 256 \cdot 4 = 1,024 \\
+& \text{Signal\_token} = \frac{N_{e}}{N_{r}} \cdot 4 = 128 \\
+& \text{Signal\_total} = 2 \cdot \max(\text{Signal\_count} + \text{Signal\_token}, \text{Signal\_count}) = 2 \cdot (1,152) = 2,304 \\
+
+& \text{Low\_Latency\_Buffer\_Size} = \left\lceil \frac{\text{Send\_total} + \text{Recv\_total} + \text{Signal\_total}}{128} \right\rceil \cdot 128 = \left\lceil \frac{939,786,240 + 939,786,240 + 2,304}{128} \right\rceil \cdot 128 = 1,879,574,784 \approx 1.8 GB \\
+\end{aligned}
+```
+log
+```sh
+>>> get_low_latency_rdma_size_hint, num_rdma_bytes: 1881147520
+```
 
 ### Notes for Low Latency Dispatch / Combine Buffer
 - Double buffering design (×2)
