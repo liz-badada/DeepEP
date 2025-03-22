@@ -247,9 +247,15 @@ sequenceDiagram
         ```
 
 ### Notes for Low Latency Dispatch / Combine Buffer
+- Unlike normal dispatch / combine, low latency dispatch / combine do not repy on SM 
+- Buffer sizes for dispatch / combine
+    - Dispatch could be BF16 or FP8, buffer size would be max(BF16, FP8), combine should be BF16
+    - Message is consist of [message header (16 bytes) + data (token size)]
+    - Both Bytes_send_buffer and Bytes_recv_buffer should be times of 16 bytes
+- Buffer size for signaling
+    - Dispatch recv counter (track how many tokens recv by expert) need 256 for all experts (counter dtype: int), 1024 bytes in total
+    - Combine recv flag (indicate recv state) need 256 for all experts, same size as distpatch recv counter, 1024 bytes in total
 - Double buffering design (×2)
     - 2 symmetric odd/even send_buffers + 2 symmetric odd/even recv_buffers + 2 symmetric odd/even signaling buffers
-- Buffer sizes for both dispatch and combine operations
-    - Dispatch could be BF16 or FP8, buffer size would be max(BF16, FP8), combine should be BF16
 - Memory alignment requirements
     - Align to 128
