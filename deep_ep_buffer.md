@@ -169,7 +169,7 @@ sequenceDiagram
 - [get_rdma_buffer_size_hint](https://github.com/liz-badada/DeepEP/blob/deepep_study/csrc/config.hpp#L67-L91)
     ```math
     \begin{aligned}
-    & \text{RDMA\_Buffer\_Size} = \frac{((C \cdot R_{rdma} \cdot 2S_{total}) + 127 ) \cdot 128}{128}
+    & \text{RDMA\_Buffer\_Size} = \frac{((C \cdot R_{rdma} \cdot 2Bytes_{total}) + 127 ) \cdot 128}{128}
     \end{aligned}
     ```
     - where:
@@ -181,7 +181,7 @@ sequenceDiagram
         ```
         ```math
         \begin{aligned}
-        & Bytes_{total} = (2N_{nvl} + 2) \cdot \text{sizeof(int)} + \quad N_{t\_recv\_rdma} \cdot (Bytes_{hidden} + Bytes_{src\_meta} + Bytes_{topk} + Bytes_{scale} + S_{int4}) \\
+        & Bytes_{total} = (2N_{nvl} + 2) \cdot \text{sizeof(int)} + \quad N_{t\_recv\_rdma} \cdot (Bytes_{hidden} + Bytes_{src\_meta} + Bytes_{topk} + Bytes_{scale} + Bytes_{header}) \\
         & N_{nvl} = \text{NUM\_MAX\_NVL\_PEERS} \\
         \end{aligned}
         ```
@@ -191,7 +191,7 @@ sequenceDiagram
         & Bytes_{src\_meta} = \text{source\_meta\_bytes} \\
         & Bytes_{topk} = N_{topk} \cdot (\text{sizeof(int64\_t)} + \text{sizeof(float)}) \\
         & Bytes_{scale} = N_{s} \cdot \text{sizeof(float)} \\
-        & S_{int4} = \text{sizeof(int4)} \\
+        & Bytes_{header} = \text{sizeof(int4)} \\
         \end{aligned}
         ```
         ```math
@@ -206,32 +206,33 @@ sequenceDiagram
 - example:
     - set: 
         ```math
-        \text{hidden\_size}=7168,\ N_{t}=128,\ N_{r}=8,\ N_{t\_recv\_nvl}=256, N_{SM}=20
+        \text{hidden\_size}=7168,\ N_{t}=128,\ N_{r}=8,\ N_{t\_recv\_rdma}=128, N_{SM}=20
         ```
     - then:
         ```math
         \begin{aligned}
         & Bytes_{hidden} = 7168 \cdot 2 = 14336 \\
         & Bytes_{src\_meta} = \text{source\_meta\_bytes} \\
-        & Bytes_{topk} = 128 \cdot (8 + 4) = 1536 \\
+        & Bytes_{topk} = 128 \cdot (8 + 4}) = 1536 \\
         & Bytes_{scale} = 128 \cdot 4 = 512 \\
+        & Bytes_{header} = 16 \\
         \end{aligned}
         ```
         ```math
         \begin{aligned}
-        & R_{rdma} = \max(\frac{8}{8}, 1) = 1\\
-        & Bytes_{total} = (2 \cdot 1 + 3) \cdot 4 + 256 \cdot (14336 + Bytes_{src\_meta} + 1536 + 512) = \\
+        & N_{nvl} = 8 \\
+        & Bytes_{total} = (2 \cdot 8 + 2) \cdot 4 + \quad 128 \cdot (14336 + Bytes_{src\_meta} + 1536 + 512 + 16) = \\
         \end{aligned}
         ```
         ```math
         \begin{aligned}
         & C = \frac{20}{2} = 10 \\
-        & R_{nvl} = \min(8, 8) = 8 \\
+        & R_{rdma} = \frac{8}{8} = 1 \\
         \end{aligned}
         ```
         ```math
         \begin{aligned}
-        & \text{NVL\_Buffer\_Size} = \frac{((10 \cdot 8 \cdot Bytes_{total}) + 127 ) \cdot 128}{128} = xxx \approx xxx GB \\
+        & \text{RDMA\_Buffer\_Size} = \frac{((10 \cdot 1 \cdot 2Bytes_{total}) + 127 ) \cdot 128}{128} = xxx \approx xxx GB \\
         \end{aligned}
         ```
     - log:
