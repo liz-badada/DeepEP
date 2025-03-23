@@ -103,13 +103,16 @@ sequenceDiagram
         \begin{aligned}
         & C = \text{num\_channels} = \frac{\text{num\_sms}}{2} \\
         & R_{nvl} = \min(\text{num\_ranks}, \text{NUM\_MAX\_NVL\_PEERS}) \\
-        & S_{total} = (2R_{rdma} + 3) \cdot \text{sizeof(int)} + T_{recv} \cdot (S_{data} + S_{meta} + S_{topk} + S_{scale}) \\
+
+        & S_{total} = (2R_{rdma} + 3) \cdot \text{sizeof(int)} + T_{recv} \cdot (Bytes_{hidden} + S_{meta} + S_{topk} + Bytes_{scale}) \\
         & R_{rdma} = \max(\frac{\text{num\_ranks}}{\text{NUM\_MAX\_NVL\_PEERS}}, 1) \\
         & T_{recv} = \text{num\_max\_nvl\_chunked\_recv\_tokens} \\
-        & S_{data} = \text{hidden\_bytes} \\
+        & Bytes_{hidden} = \text{hidden\_bytes} = \text{hidden\_size} \cdot \max(\text{element\_size},\ 2) \\
         & S_{meta} = \text{source\_meta\_bytes} \\
         & S_{topk} = 128 \cdot (\text{sizeof(int64\_t)} + \text{sizeof(float)}) \\
-        & S_{scale} = 128 \cdot \text{sizeof(float)}
+        & Bytes_{scale} = 128 \cdot \text{sizeof(float)}
+
+        N_{t\_recv} = \text{num\_max\_nvl\_chunked\_recv\_tokens} \\
         \end{aligned}
         ```
 
@@ -125,18 +128,19 @@ sequenceDiagram
         \begin{aligned}
         & C = \text{num\_channels} = \frac{\text{num\_sms}}{2} \\
         & R_{rdma} = \frac{\text{num\_ranks}}{\text{NUM\_MAX\_NVL\_PEERS}} \\
-        & S_{total} = (2N_{nvl} + 2) \cdot \text{sizeof(int)} + \quad T_{recv} \cdot (S_{data} + S_{meta} + S_{topk} + S_{scale} + S_{int4}) \\
+        & S_{total} = (2N_{nvl} + 2) \cdot \text{sizeof(int)} + \quad T_{recv} \cdot (Bytes_{hidden} + S_{meta} + S_{topk} + Bytes_{scale} + S_{int4}) \\
         & N_{nvl} = \text{NUM\_MAX\_NVL\_PEERS} \\
         & T_{recv} = \text{num\_max\_rdma\_chunked\_recv\_tokens} \\
-        & S_{data} = \text{hidden\_bytes} \\
+        & Bytes_{hidden} = \text{hidden\_bytes} = \text{hidden\_size} \cdot \max(\text{element\_size},\ 2) \\
         & S_{meta} = \text{source\_meta\_bytes} \\
         & S_{topk} = 128 \cdot (\text{sizeof(int64\_t)} + \text{sizeof(float)}) \\
-        & S_{scale} = 128 \cdot \text{sizeof(float)} \\
+        & Bytes_{scale} = 128 \cdot \text{sizeof(float)} \\
         & S_{int4} = \text{sizeof(int4)}
         \end{aligned}
         ```
 
 #### Notes for Normal Dispatch / Combine Buffer
+- SM count must be even, default is 20
 - All calculation results are aligned to 128 bytes
 - RDMA buffer size includes bidirectional communication ($\times 2$)
 - Both buffers contain space for control information, data, metadata, TopK, and scale factors
@@ -144,7 +148,7 @@ sequenceDiagram
     <center>
 
     | Constant | Value | Description |
-    |---|---|---|
+    |------------------|---------|--------------------------------|
     | NUM_MAX_NVL_PEERS | 8 | Maximum number of NVL peers |
     | NUM_MAX_RDMA_PEERS | 20 | Maximum number of RDMA peers |
     | NUM_MAX_FIFO_SLOTS | 32768 | Maximum number of FIFO slots |
@@ -155,6 +159,23 @@ sequenceDiagram
     | NUM_CPU_TIMEOUT_SECS | 100 | CPU timeout in seconds |
     | NUM_TIMEOUT_CYCLES | 200000000000ull | Timeout cycles (~100s) |
     | NUM_WAIT_NANOSECONDS | 500 | Wait time in nanoseconds |
+
+    </center>
+- Dispatch config
+    <center>
+
+    | Num Ranks | Num SMs | num_max_nvl_chunked_send_tokens | num_max_nvl_chunked_recv_tokens | num_max_rdma_chunked_send_tokens | num_max_rdma_chunked_recv_tokens |
+    |---------|---------|--------------------------------|--------------------------------|----------------------------------|----------------------------------|
+    | 2 | 20 | 16 | 256 | 6 | 128 |
+    | 4 | 20 | 16 | 256 | 6 | 128 |
+    | 8 | 20 | 6 | 256 | 6 | 128 |
+    | 16 | 20 | 16 | 288 | 20 | 128 |
+    | 24 | 20 | 8 | 288 | 32 | 128 |
+    | 32 | 20 | 8 | 288 | 32 | 128 |
+    | 64 | 20 | 20 | 288 | 28 | 128 |
+    | 128 | 20 | 20 | 560 | 32 | 128 |
+    | 144 | 20 | 32 | 720 | 12 | 128 |
+    | 160 | 20 | 28 | 720 | 12 | 128 |
 
     </center>
 
