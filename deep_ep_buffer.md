@@ -161,10 +161,10 @@ sequenceDiagram
     | NUM_WAIT_NANOSECONDS | 500 | Wait time in nanoseconds |
 
     </center>
-- Dispatch config
+- Dispatch config for different ranks
     <center>
 
-    | Num Ranks | Num SMs | num_max_nvl_chunked_send_tokens | num_max_nvl_chunked_recv_tokens | num_max_rdma_chunked_send_tokens | num_max_rdma_chunked_recv_tokens |
+    | num_ranks | num_sms | num_max_nvl_chunked_send_tokens | num_max_nvl_chunked_recv_tokens | num_max_rdma_chunked_send_tokens | num_max_rdma_chunked_recv_tokens |
     |---------|---------|--------------------------------|--------------------------------|----------------------------------|----------------------------------|
     | 2 | 20 | 16 | 256 | 6 | 128 |
     | 4 | 20 | 16 | 256 | 6 | 128 |
@@ -176,6 +176,23 @@ sequenceDiagram
     | 128 | 20 | 20 | 560 | 32 | 128 |
     | 144 | 20 | 32 | 720 | 12 | 128 |
     | 160 | 20 | 28 | 720 | 12 | 128 |
+
+    </center>
+- Combine config for different ranks
+    <center>
+
+    | num_ranks | num_sms | num_max_nvl_chunked_send_tokens | num_max_nvl_chunked_recv_tokens | num_max_rdma_chunked_send_tokens | num_max_rdma_chunked_recv_tokens |
+    |---------|---------|--------------------------------|--------------------------------|----------------------------------|----------------------------------|
+    | 2 | 20 | 6 | 256 | 6 | 128 |
+    | 4 | 20 | 6 | 256 | 6 | 128 |
+    | 8 | 20 | 6 | 256 | 6 | 128 |
+    | 16 | 20 | 2 | 288 | 28 | 128 |
+    | 24 | 20 | 1 | 288 | 20 | 128 |
+    | 32 | 20 | 1 | 288 | 20 | 128 |
+    | 64 | 20 | 1 | 288 | 20 | 128 |
+    | 128 | 20 | 1 | 560 | 12 | 128 |
+    | 144 | 20 | 2 | 720 | 8 | 128 |
+    | 160 | 20 | 2 | 720 | 8 | 128 |
 
     </center>
 
