@@ -265,7 +265,7 @@ sequenceDiagram
 - Dispatch config for different ranks
     <center>
 
-    | $N_{r}$ | $N_{SM}$ | $N_{t_send_nvl}$ | $N_{t_recv_nvl}$ | $N_{t_send_rdma}$ | $N_{t_recv_rdma}$ |
+    | $N_{r}$ | $N_{SM}$ | $N_{t\_send\_nvl}$ | $N_{t\_recv\_nvl}$ | $N_{t\_send\_rdma}$ | $N_{t\_recv\_rdma}$ |
     |---------|---------|--------------------------------|--------------------------------|----------------------------------|----------------------------------|
     | 2 | 20 | 16 | 256 | 6 | 128 |
     | 4 | 20 | 16 | 256 | 6 | 128 |
