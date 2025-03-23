@@ -91,7 +91,7 @@ sequenceDiagram
     LowLatencyBuffer-->>Client: Return cleaned metadata
 ```
 
-### NVL Buffer Size (when num_ranks > 0, align to 128 bytes)
+### Normal NVL Buffer Size (when num_ranks > 0, align to 128 bytes)
 - [get_nvl_buffer_size_hint](https://github.com/liz-badada/DeepEP/blob/deepep_study/csrc/config.hpp#L45-L65)
     ```math
     \begin{aligned}
@@ -113,7 +113,7 @@ sequenceDiagram
         \end{aligned}
         ```
 
-### RDMA Buffer Size (when num_ranks ≤ NUM_MAX_NVL_PEERS, align to 128 bytes)
+### Normal RDMA Buffer Size (when num_ranks ≤ NUM_MAX_NVL_PEERS, align to 128 bytes)
 - [get_rdma_buffer_size_hint](https://github.com/liz-badada/DeepEP/blob/deepep_study/csrc/config.hpp#L67-L91)
     ```math
     \begin{aligned}
@@ -136,7 +136,7 @@ sequenceDiagram
         \end{aligned}
         ```
 
-### Notes for Normal Dispatch / Combine Buffer
+#### Notes for Normal Dispatch / Combine Buffer
 - All calculation results are aligned to 128 bytes
 - RDMA buffer size includes bidirectional communication ($\times 2$)
 - Both buffers contain space for control information, data, metadata, TopK, and scale factors
@@ -246,7 +246,7 @@ sequenceDiagram
         >>> get_low_latency_rdma_size_hint, num_rdma_bytes: 1881147520
         ```
 
-### Notes for Low Latency Dispatch / Combine Buffer
+#### Notes for Low Latency Dispatch / Combine Buffer
 - Unlike normal dispatch / combine, low latency dispatch / combine do not repy on SM 
 - Buffer sizes for dispatch / combine
     - Dispatch could be BF16 or FP8, buffer size would be max(BF16, FP8), combine should be BF16
