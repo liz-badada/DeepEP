@@ -240,7 +240,7 @@ sequenceDiagram
         ```
     - log:
         ```sh
-        >>> get_rdma_buffer_size_hint, num_rdma_bytes: 335709824
+        >>> get_rdma_buffer_size_hint, num_rdma_bytes: 0
         ```
 
 ### Notes for Normal Dispatch / Combine Buffer
