@@ -139,7 +139,7 @@ sequenceDiagram
         ```math
         \begin{aligned}
         & Bytes_{hidden} = 7168 \cdot 2 = 14336 \\
-        & Bytes_{src\_meta} = \text{source\_meta\_bytes} \\
+        & Bytes_{src\_meta} = 8 \\
         & Bytes_{topk} = 128 \cdot (8 + 4) = 1536 \\
         & Bytes_{scale} = 128 \cdot 4 = 512 \\
         \end{aligned}
