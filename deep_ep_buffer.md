@@ -125,6 +125,7 @@ sequenceDiagram
         & N_{s} = \text{kNumMaxScales} = 128 \\
         & N_{r} = \text{num\_ranks} \\
         & N_{SM} = 20 \\
+        & \text{source\_meta\_bytes} = 8 \\
         & N_{t\_send\_nvl} = \text{num\_max\_nvl\_chunked\_send\_tokens} \\
         & N_{t\_recv\_nvl} = \text{num\_max\_nvl\_chunked\_recv\_tokens} \\
         \end{aligned}
@@ -146,7 +147,7 @@ sequenceDiagram
         ```math
         \begin{aligned}
         & R_{rdma} = \max(\frac{8}{8}, 1) = 1\\
-        & Bytes_{total} = (2 \cdot 1 + 3) \cdot 4 + 256 \cdot (14336 + Bytes_{src\_meta} + 1536 + 512) = \\
+        & Bytes_{total} = (2 \cdot 1 + 3) \cdot 4 + 256 \cdot (14336 + 8 + 1536 + 512) = 4,196,372 \\
         \end{aligned}
         ```
         ```math
@@ -157,12 +158,12 @@ sequenceDiagram
         ```
         ```math
         \begin{aligned}
-        & \text{NVL\_Buffer\_Size} = \frac{((10 \cdot 8 \cdot Bytes_{total}) + 127 ) \cdot 128}{128} = xxx \approx xxx GB \\
+        & \text{NVL\_Buffer\_Size} = \frac{((10 \cdot 8 \cdot (4,196,372)) + 127 ) \cdot 128}{128} = 335,709,887 \approx 320 MB \\
         \end{aligned}
         ```
     - log:
         ```sh
-        >>> get_nvl_buffer_size_hint, num_nvl_bytes: 
+        >>> get_nvl_buffer_size_hint, num_nvl_bytes: 335709824
         ```
 
 ### Normal RDMA Buffer Size (when num_ranks ≤ NUM_MAX_NVL_PEERS, align to 128 bytes)
@@ -199,6 +200,8 @@ sequenceDiagram
         & N_{topk} = \text{kNumMaxTopK} = 128 \\
         & N_{s} = \text{kNumMaxScales} = 128 \\
         & N_{r} = \text{num\_ranks} \\
+        & N_{SM} = 20 \\
+        & \text{source\_meta\_bytes} = 8 \\
         & N_{t\_send\_rdma} = \text{num\_max\_rdma\_chunked\_send\_tokens} \\
         & N_{t\_recv\_rdma} = \text{num\_max\_rdma\_chunked\_recv\_tokens} \\
         \end{aligned}
@@ -212,7 +215,7 @@ sequenceDiagram
         ```math
         \begin{aligned}
         & Bytes_{hidden} = 7168 \cdot 2 = 14336 \\
-        & Bytes_{src\_meta} = \text{source\_meta\_bytes} \\
+        & Bytes_{src\_meta} = 8 \\
         & Bytes_{topk} = 128 \cdot (8 + 4) = 1536 \\
         & Bytes_{scale} = 128 \cdot 4 = 512 \\
         & Bytes_{header} = 16 \\
@@ -221,7 +224,7 @@ sequenceDiagram
         ```math
         \begin{aligned}
         & N_{nvl} = 8 \\
-        & Bytes_{total} = (2 \cdot 8 + 2) \cdot 4 + \quad 128 \cdot (14336 + Bytes_{src\_meta} + 1536 + 512 + 16) = \\
+        & Bytes_{total} = (2 \cdot 8 + 2) \cdot 4 + \quad 128 \cdot (14336 + 8 + 1536 + 512 + 16) = 2,100,296 \\
         \end{aligned}
         ```
         ```math
@@ -232,12 +235,12 @@ sequenceDiagram
         ```
         ```math
         \begin{aligned}
-        & \text{RDMA\_Buffer\_Size} = \frac{((10 \cdot 1 \cdot 2Bytes_{total}) + 127 ) \cdot 128}{128} = xxx \approx xxx GB \\
+        & \text{RDMA\_Buffer\_Size} = \frac{((10 \cdot 1 \cdot 2 \cdot (2,100,296)) + 127 ) \cdot 128}{128} = 42,006,047 \approx 40 MB \\
         \end{aligned}
         ```
     - log:
         ```sh
-        >>> get_rdma_buffer_size_hint, num_rdma_bytes: 
+        >>> get_rdma_buffer_size_hint, num_rdma_bytes: 335709824
         ```
 
 ### Notes for Normal Dispatch / Combine Buffer
