@@ -95,25 +95,69 @@ sequenceDiagram
 - [get_nvl_buffer_size_hint](https://github.com/liz-badada/DeepEP/blob/deepep_study/csrc/config.hpp#L45-L65)
     ```math
     \begin{aligned}
-    \text{NVL\_Buffer\_Size} = \frac{((C \cdot R_{nvl} \cdot S_{total}) + 127 ) \cdot 128}{128}
+    \text{NVL\_Buffer\_Size} = \frac{((C \cdot R_{nvl} \cdot Bytes_{total}) + 127 ) \cdot 128}{128}
     \end{aligned}
     ```
     - where:
         ```math
         \begin{aligned}
         & C = \text{num\_channels} = \frac{\text{num\_sms}}{2} \\
-        & R_{nvl} = \min(\text{num\_ranks}, \text{NUM\_MAX\_NVL\_PEERS}) \\
-
-        & S_{total} = (2R_{rdma} + 3) \cdot \text{sizeof(int)} + T_{recv} \cdot (Bytes_{hidden} + S_{meta} + S_{topk} + Bytes_{scale}) \\
-        & R_{rdma} = \max(\frac{\text{num\_ranks}}{\text{NUM\_MAX\_NVL\_PEERS}}, 1) \\
-        & T_{recv} = \text{num\_max\_nvl\_chunked\_recv\_tokens} \\
-        & Bytes_{hidden} = \text{hidden\_bytes} = \text{hidden\_size} \cdot \max(\text{element\_size},\ 2) \\
-        & S_{meta} = \text{source\_meta\_bytes} \\
-        & S_{topk} = 128 \cdot (\text{sizeof(int64\_t)} + \text{sizeof(float)}) \\
-        & Bytes_{scale} = 128 \cdot \text{sizeof(float)}
-
-        N_{t\_recv} = \text{num\_max\_nvl\_chunked\_recv\_tokens} \\
+        & R_{nvl} = \min(N_{r}, \text{NUM\_MAX\_NVL\_PEERS}) \\
         \end{aligned}
+        ```
+        ```math
+        \begin{aligned}
+        & Bytes_{total} = (2R_{rdma} + 3) \cdot \text{sizeof(int)} + N_{t\_recv\_nvl} \cdot (Bytes_{hidden} + Bytes_{src\_meta} + Bytes_{topk} + Bytes_{scale}) \\
+        & R_{rdma} = \max(\frac{N_{r}}{\text{NUM\_MAX\_NVL\_PEERS}}, 1) \\
+        \end{aligned}
+        ```
+        ```math
+        \begin{aligned}
+        & Bytes_{hidden} = \text{hidden\_bytes} = \text{hidden\_size} \cdot \max(\text{element\_size},\ 2) \\
+        & Bytes_{src\_meta} = \text{source\_meta\_bytes} \\
+        & Bytes_{topk} = N_{topk} \cdot (\text{sizeof(int64\_t)} + \text{sizeof(float)}) \\
+        & Bytes_{s} = N_{scale} \cdot \text{sizeof(float)} \\
+        \end{aligned}
+        ```
+        ```math
+        \begin{aligned}
+        & N_{topk} = \text{kNumMaxTopK} = 128 \\
+        & N_{s} = \text{kNumMaxScales} = 128 \\
+        & N_{r} = \text{num\_ranks} \\
+        & N_{t\_send\_nvl} = \text{num\_max\_nvl\_chunked\_send\_tokens} \\
+        & N_{t\_recv\_nvl} = \text{num\_max\_nvl\_chunked\_recv\_tokens} \\
+        \end{aligned}
+        ```
+- example:
+    - set: 
+        ```math
+        \text{hidden\_size}=7168,\ N_{s}=\frac{\text{hidden\_size}}{128}=56,\ N_{t}=128,\ N_{e}=256,\ N_{r}=8
+        ```
+    - then:
+        ```math
+        \begin{aligned}
+        \end{aligned}
+        ```
+        ```math
+        \begin{aligned}
+        \end{aligned}
+        ```
+        ```math
+        \begin{aligned}
+        \end{aligned}
+        ```
+        ```math
+        \begin{aligned}
+        \end{aligned}
+        ```
+        ```math
+        \begin{aligned}
+        & \text{Low\_Latency\_Buffer\_Size} = \frac{(2 \cdot (470,286,336) + 2 \cdot (470,286,336) + 2 \cdot (1,024) + 128)}{128} \cdot 128 = 1,881,147,520 \approx 1.8 GB \\
+        \end{aligned}
+        ```
+    - log:
+        ```sh
+        >>> get_nvl_buffer_size_hint, num_nvl_bytes: 1881147520
         ```
 
 ### Normal RDMA Buffer Size (when num_ranks ≤ NUM_MAX_NVL_PEERS, align to 128 bytes)
@@ -127,16 +171,63 @@ sequenceDiagram
         ```math
         \begin{aligned}
         & C = \text{num\_channels} = \frac{\text{num\_sms}}{2} \\
-        & R_{rdma} = \frac{\text{num\_ranks}}{\text{NUM\_MAX\_NVL\_PEERS}} \\
-        & S_{total} = (2N_{nvl} + 2) \cdot \text{sizeof(int)} + \quad T_{recv} \cdot (Bytes_{hidden} + S_{meta} + S_{topk} + Bytes_{scale} + S_{int4}) \\
-        & N_{nvl} = \text{NUM\_MAX\_NVL\_PEERS} \\
-        & T_{recv} = \text{num\_max\_rdma\_chunked\_recv\_tokens} \\
-        & Bytes_{hidden} = \text{hidden\_bytes} = \text{hidden\_size} \cdot \max(\text{element\_size},\ 2) \\
-        & S_{meta} = \text{source\_meta\_bytes} \\
-        & S_{topk} = 128 \cdot (\text{sizeof(int64\_t)} + \text{sizeof(float)}) \\
-        & Bytes_{scale} = 128 \cdot \text{sizeof(float)} \\
-        & S_{int4} = \text{sizeof(int4)}
+        & R_{rdma} = \frac{N_{r}}{\text{NUM\_MAX\_NVL\_PEERS}} \\
         \end{aligned}
+        ```
+        ```math
+        \begin{aligned}
+        & Bytes_{total} = (2N_{nvl} + 2) \cdot \text{sizeof(int)} + \quad N_{t\_recv\_rdma} \cdot (Bytes_{hidden} + Bytes_{src\_meta} + Bytes_{topk} + Bytes_{scale} + S_{int4}) \\
+        & N_{nvl} = \text{NUM\_MAX\_NVL\_PEERS} \\
+        \end{aligned}
+        ```
+        ```math
+        \begin{aligned}
+        & Bytes_{hidden} = \text{hidden\_bytes} = \text{hidden\_size} \cdot \max(\text{element\_size},\ 2) \\
+        & Bytes_{src\_meta} = \text{source\_meta\_bytes} \\
+        & Bytes_{topk} = N_{topk} \cdot (\text{sizeof(int64\_t)} + \text{sizeof(float)}) \\
+        & Bytes_{scale} = N_{s} \cdot \text{sizeof(float)} \\
+        & S_{int4} = \text{sizeof(int4)} \\
+        \end{aligned}
+        ```
+        ```math
+        \begin{aligned}
+        & N_{topk} = \text{kNumMaxTopK} = 128 \\
+        & N_{s} = \text{kNumMaxScales} = 128 \\
+        & N_{r} = \text{num\_ranks} \\
+        & N_{t\_send\_rdma} = \text{num\_max\_rdma\_chunked\_send\_tokens} \\
+        & N_{t\_recv\_rdma} = \text{num\_max\_rdma\_chunked\_recv\_tokens} \\
+        \end{aligned}
+        ```
+- example:
+    - set: 
+        ```math
+        \text{hidden\_size}=7168,\ N_{s}=\frac{\text{hidden\_size}}{128}=56,\ N_{t}=128,\ N_{e}=256,\ N_{r}=8
+        ```
+    - then:
+        ```math
+        \begin{aligned}
+        \end{aligned}
+        ```
+        ```math
+        \begin{aligned}
+        \end{aligned}
+        ```
+        ```math
+        \begin{aligned}
+        \end{aligned}
+        ```
+        ```math
+        \begin{aligned}
+        \end{aligned}
+        ```
+        ```math
+        \begin{aligned}
+        & \text{Low\_Latency\_Buffer\_Size} = \frac{(2 \cdot (470,286,336) + 2 \cdot (470,286,336) + 2 \cdot (1,024) + 128)}{128} \cdot 128 = 1,881,147,520 \approx 1.8 GB \\
+        \end{aligned}
+        ```
+    - log:
+        ```sh
+        >>> get_rdma_buffer_size_hint, num_nvl_bytes: 1881147520
         ```
 
 #### Notes for Normal Dispatch / Combine Buffer
@@ -164,7 +255,7 @@ sequenceDiagram
 - Dispatch config for different ranks
     <center>
 
-    | num_ranks | num_sms | num_max_nvl_chunked_send_tokens | num_max_nvl_chunked_recv_tokens | num_max_rdma_chunked_send_tokens | num_max_rdma_chunked_recv_tokens |
+    | $N_{r}$ | $N_{SM}$ | $N_{t\_send\_nvl}$ | $N_{t\_recv\_nvl}$ | $N_{t\_send\_rdma}$ | $N_{t\_recv\_rdma}$ |
     |---------|---------|--------------------------------|--------------------------------|----------------------------------|----------------------------------|
     | 2 | 20 | 16 | 256 | 6 | 128 |
     | 4 | 20 | 16 | 256 | 6 | 128 |
@@ -181,7 +272,7 @@ sequenceDiagram
 - Combine config for different ranks
     <center>
 
-    | num_ranks | num_sms | num_max_nvl_chunked_send_tokens | num_max_nvl_chunked_recv_tokens | num_max_rdma_chunked_send_tokens | num_max_rdma_chunked_recv_tokens |
+    | $N_{r}$ | $N_{SM}$ | $N_{t\_send\_nvl}$ | $N_{t\_recv\_nvl}$ | $N_{t\_send\_rdma}$ | $N_{t\_recv\_rdma}$ |
     |---------|---------|--------------------------------|--------------------------------|----------------------------------|----------------------------------|
     | 2 | 20 | 6 | 256 | 6 | 128 |
     | 4 | 20 | 6 | 256 | 6 | 128 |
@@ -195,6 +286,7 @@ sequenceDiagram
     | 160 | 20 | 2 | 720 | 8 | 128 |
 
     </center>
+    - 
 
 ### Low Latency Buffer Size (align to 128 bytes)
 - [get_low_latency_rdma_size_hint](https://github.com/liz-badada/DeepEP/blob/deepep_study/csrc/config.hpp#L123-L180)
@@ -241,7 +333,6 @@ sequenceDiagram
         ```
 
 - example:
-
     - set: 
         ```math
         \text{hidden\_size}=7168,\ N_{s}=\frac{\text{hidden\_size}}{128}=56,\ N_{t}=128,\ N_{e}=256,\ N_{r}=8
