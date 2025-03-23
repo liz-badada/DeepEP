@@ -133,7 +133,7 @@ sequenceDiagram
 - example:
     - set: 
         ```math
-        \text{hidden\_size}=7168,\ N_{t}=128,\ N_{r}=8,\ N_{t\_recv\_nvl}=256, N_{SM}=20
+        \text{hidden\_size}=7168,\ N_{t}=128,\ N_{r}=8,\ N_{t\_recv\_nvl}=256,\ N_{SM}=20
         ```
     - then:
         ```math
@@ -209,7 +209,7 @@ sequenceDiagram
 - example:
     - set: 
         ```math
-        \text{hidden\_size}=7168,\ N_{t}=128,\ N_{r}=8,\ N_{t\_recv\_rdma}=128, N_{SM}=20
+        \text{hidden\_size}=7168,\ N_{t}=128,\ N_{r}=8,\ N_{t\_recv\_rdma}=128,\ N_{SM}=20
         ```
     - then:
         ```math
