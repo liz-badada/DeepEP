@@ -286,7 +286,6 @@ sequenceDiagram
     | 160 | 20 | 2 | 720 | 8 | 128 |
 
     </center>
-    - 
 
 ### Low Latency Buffer Size (align to 128 bytes)
 - [get_low_latency_rdma_size_hint](https://github.com/liz-badada/DeepEP/blob/deepep_study/csrc/config.hpp#L123-L180)
