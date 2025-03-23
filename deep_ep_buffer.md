@@ -101,7 +101,7 @@ sequenceDiagram
     - where:
         ```math
         \begin{aligned}
-        & C = \text{num\_channels} = \frac{\text{num\_sms}}{2} \\
+        & C = \text{num\_channels} = \frac{N_{SM}}{2} \\
         & R_{nvl} = \min(N_{r}, \text{NUM\_MAX\_NVL\_PEERS}) \\
         \end{aligned}
         ```
@@ -116,7 +116,7 @@ sequenceDiagram
         & Bytes_{hidden} = \text{hidden\_bytes} = \text{hidden\_size} \cdot \max(\text{element\_size},\ 2) \\
         & Bytes_{src\_meta} = \text{source\_meta\_bytes} \\
         & Bytes_{topk} = N_{topk} \cdot (\text{sizeof(int64\_t)} + \text{sizeof(float)}) \\
-        & Bytes_{s} = N_{scale} \cdot \text{sizeof(float)} \\
+        & Bytes_{scale} = N_{s} \cdot \text{sizeof(float)} \\
         \end{aligned}
         ```
         ```math
@@ -124,6 +124,7 @@ sequenceDiagram
         & N_{topk} = \text{kNumMaxTopK} = 128 \\
         & N_{s} = \text{kNumMaxScales} = 128 \\
         & N_{r} = \text{num\_ranks} \\
+        & N_{SM} = 20 \\
         & N_{t\_send\_nvl} = \text{num\_max\_nvl\_chunked\_send\_tokens} \\
         & N_{t\_recv\_nvl} = \text{num\_max\_nvl\_chunked\_recv\_tokens} \\
         \end{aligned}
@@ -131,33 +132,37 @@ sequenceDiagram
 - example:
     - set: 
         ```math
-        \text{hidden\_size}=7168,\ N_{s}=\frac{\text{hidden\_size}}{128}=56,\ N_{t}=128,\ N_{e}=256,\ N_{r}=8
+        \text{hidden\_size}=7168,\ N_{t}=128,\ N_{r}=8,\ N_{t\_recv\_nvl}=256, N_{SM}=20
         ```
     - then:
         ```math
         \begin{aligned}
+        & Bytes_{hidden} = 7168 \cdot 2 = 14336 \\
+        & Bytes_{src\_meta} = \text{source\_meta\_bytes} \\
+        & Bytes_{topk} = 128 \cdot (8 + 4) = 1536 \\
+        & Bytes_{scale} = 128 \cdot 4 = 512 \\
         \end{aligned}
         ```
         ```math
         \begin{aligned}
+        & R_{rdma} = \max(\frac{8}{8}, 1) = 1\\
+        & Bytes_{total} = (2 \cdot 1 + 3) \cdot 4 + 256 \cdot (14336 + Bytes_{src\_meta} + 1536 + 512) = \\
         \end{aligned}
         ```
         ```math
         \begin{aligned}
+        & C = \frac{20}{2} = 10 \\
+        & R_{nvl} = \min(8, 8) = 8 \\
         \end{aligned}
         ```
         ```math
         \begin{aligned}
-        \end{aligned}
-        ```
-        ```math
-        \begin{aligned}
-        & \text{Low\_Latency\_Buffer\_Size} = \frac{(2 \cdot (470,286,336) + 2 \cdot (470,286,336) + 2 \cdot (1,024) + 128)}{128} \cdot 128 = 1,881,147,520 \approx 1.8 GB \\
+        & \text{NVL\_Buffer\_Size} = \frac{((10 \cdot 8 \cdot Bytes_{total}) + 127 ) \cdot 128}{128} = xxx \approx xxx GB \\
         \end{aligned}
         ```
     - log:
         ```sh
-        >>> get_nvl_buffer_size_hint, num_nvl_bytes: 1881147520
+        >>> get_nvl_buffer_size_hint, num_nvl_bytes: 
         ```
 
 ### Normal RDMA Buffer Size (when num_ranks ≤ NUM_MAX_NVL_PEERS, align to 128 bytes)
@@ -170,7 +175,7 @@ sequenceDiagram
     - where:
         ```math
         \begin{aligned}
-        & C = \text{num\_channels} = \frac{\text{num\_sms}}{2} \\
+        & C = \text{num\_channels} = \frac{N_{SM}}{2} \\
         & R_{rdma} = \frac{N_{r}}{\text{NUM\_MAX\_NVL\_PEERS}} \\
         \end{aligned}
         ```
@@ -201,36 +206,40 @@ sequenceDiagram
 - example:
     - set: 
         ```math
-        \text{hidden\_size}=7168,\ N_{s}=\frac{\text{hidden\_size}}{128}=56,\ N_{t}=128,\ N_{e}=256,\ N_{r}=8
+        \text{hidden\_size}=7168,\ N_{t}=128,\ N_{r}=8,\ N_{t\_recv\_nvl}=256, N_{SM}=20
         ```
     - then:
         ```math
         \begin{aligned}
+        & Bytes_{hidden} = 7168 \cdot 2 = 14336 \\
+        & Bytes_{src\_meta} = \text{source\_meta\_bytes} \\
+        & Bytes_{topk} = 128 \cdot (8 + 4) = 1536 \\
+        & Bytes_{scale} = 128 \cdot 4 = 512 \\
         \end{aligned}
         ```
         ```math
         \begin{aligned}
+        & R_{rdma} = \max(\frac{8}{8}, 1) = 1\\
+        & Bytes_{total} = (2 \cdot 1 + 3) \cdot 4 + 256 \cdot (14336 + Bytes_{src\_meta} + 1536 + 512) = \\
         \end{aligned}
         ```
         ```math
         \begin{aligned}
+        & C = \frac{20}{2} = 10 \\
+        & R_{nvl} = \min(8, 8) = 8 \\
         \end{aligned}
         ```
         ```math
         \begin{aligned}
-        \end{aligned}
-        ```
-        ```math
-        \begin{aligned}
-        & \text{Low\_Latency\_Buffer\_Size} = \frac{(2 \cdot (470,286,336) + 2 \cdot (470,286,336) + 2 \cdot (1,024) + 128)}{128} \cdot 128 = 1,881,147,520 \approx 1.8 GB \\
+        & \text{NVL\_Buffer\_Size} = \frac{((10 \cdot 8 \cdot Bytes_{total}) + 127 ) \cdot 128}{128} = xxx \approx xxx GB \\
         \end{aligned}
         ```
     - log:
         ```sh
-        >>> get_rdma_buffer_size_hint, num_nvl_bytes: 1881147520
+        >>> get_rdma_buffer_size_hint, num_rdma_bytes: 
         ```
 
-#### Notes for Normal Dispatch / Combine Buffer
+### Notes for Normal Dispatch / Combine Buffer
 - SM count must be even, default is 20
 - All calculation results are aligned to 128 bytes
 - RDMA buffer size includes bidirectional communication ($\times 2$)
