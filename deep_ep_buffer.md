@@ -206,7 +206,7 @@ sequenceDiagram
         & N_{t\_recv\_rdma} = \text{num\_max\_rdma\_chunked\_recv\_tokens} \\
         \end{aligned}
         ```
-- example:
+<!-- - example:
     - set: 
         ```math
         \text{hidden\_size}=7168,\ N_{t}=128,\ N_{r}=8,\ N_{t\_recv\_rdma}=128,\ N_{SM}=20
@@ -241,7 +241,7 @@ sequenceDiagram
     - log:
         ```sh
         >>> get_rdma_buffer_size_hint, num_rdma_bytes: 0
-        ```
+        ``` -->
 
 ### Notes for Normal Dispatch / Combine Buffer
 - SM count must be even, default is 20
